@@ -19,7 +19,7 @@ class ReActAgent:
         self.model = model
         self.project_directory = project_directory
         self.client = OpenAI(
-            base_url="https://openrouter.ai/api/v1",
+            base_url="http://localhost:11434/v1",
             api_key=ReActAgent.get_api_key(),
         )
 
@@ -95,9 +95,9 @@ class ReActAgent:
     def get_api_key() -> str:
         """Load the API key from an environment variable."""
         load_dotenv()
-        api_key = os.getenv("OPENROUTER_API_KEY")
+        api_key = os.getenv("OLLAMA_API_KEY")
         if not api_key:
-            raise ValueError("未找到 OPENROUTER_API_KEY 环境变量，请在 .env 文件中设置。")
+            raise ValueError("未找到 OLLAMA_API_KEY 环境变量，请在 .env 文件中设置。")
         return api_key
 
     def call_model(self, messages):
@@ -213,10 +213,22 @@ def run_terminal_command(command):
 @click.argument('project_directory',
                 type=click.Path(exists=True, file_okay=False, dir_okay=True))
 def main(project_directory):
+    # # 测试专用start
+    # client = OpenAI(
+    #     base_url="http://localhost:11434/v1",
+    #     api_key="ollama"
+    # )
+    # resp = client.chat.completions.create(
+    #     model="qwen3-coder:30b",
+    #     messages=[{"role": "user", "content": "hello"}]
+    # )
+    # print(resp.choices[0].message.content)
+    # # 测试专用end
+
     project_dir = os.path.abspath(project_directory)
 
     tools = [read_file, write_to_file, run_terminal_command]
-    agent = ReActAgent(tools=tools, model="openai/gpt-4o", project_directory=project_dir)
+    agent = ReActAgent(tools=tools, model="qwen3-coder:30b", project_directory=project_dir)
 
     task = input("请输入任务：")
 
